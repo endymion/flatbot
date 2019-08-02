@@ -42,10 +42,12 @@ routes[0][:legs].each do |leg|
         gmaps.elevation_along_path([from_location, to_location], 3).flatten
 
       interpolated_locations_with_elevation_this_step.map do |location|
-        puts location[:elevation]
+        puts "location: #{location.inspect}"
       end
 
-      # puts inclines(interpolated_locations_with_elevation_this_step).join("\n")
+      puts "slope percentages:\n" +
+        inclines(interpolated_locations_with_elevation_this_step).join("\n") +
+        "\n\n"
     end
 
   end
