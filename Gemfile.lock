@@ -1,14 +1,17 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    awesome_print (1.8.0)
     envyable (1.2.0)
       thor (>= 0.18.1, < 2.0)
     google_maps_service (0.4.2)
       hurley (~> 0.1)
       multi_json (~> 1.11)
       retriable (~> 2.0)
+    haversine (0.3.2)
     hurley (0.2)
     multi_json (1.13.1)
+    polylines (0.3.0)
     retriable (2.1.0)
     thor (0.20.3)
 
@@ -16,8 +19,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  awesome_print
   envyable
   google_maps_service
+  haversine
+  polylines
 
 RUBY VERSION
    ruby 2.6.0p0
