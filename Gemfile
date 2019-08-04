@@ -1,11 +1,5 @@
-source 'https://rubygems.org'
-git_source(:github) { |repo| "https://github.com/#{repo}.git" }
+source "https://rubygems.org"
 
-ruby '2.6.0'
+git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
-gem 'envyable'
-gem 'awesome_print'
-
-gem 'google_maps_service'
-gem 'haversine'
-gem 'polylines'
+gemspec
