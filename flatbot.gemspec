@@ -31,4 +31,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "polylines", "~> 0.3.0"
   spec.add_dependency "thor", "~> 0.20.3"
   spec.add_dependency "ruby-progressbar", "~> 1.10.1"
+  spec.add_dependency "daybreak", "~> 0.3.0"
 end

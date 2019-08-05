@@ -1,6 +1,7 @@
 require 'csv'
 require 'awesome_print'
 require 'google_maps_service'
+require 'daybreak'
 
 class Flatbot
 
@@ -27,6 +28,9 @@ class Flatbot
     end
 
     inclines = []
+    @coordinates_db = Daybreak::DB.new 'coordinates.db'
+
+    @coordinates_db['foo'] = 2
     routes[0][:legs].each do |leg|
       leg[:steps].each do |step|
 
@@ -37,14 +41,26 @@ class Flatbot
           from_location = locations[i]
           to_location = locations[i+1]
 
+          # Key for caching coordinates.
+          db_key = from_location.to_s + to_location.to_s +
+            @options['interpolations'].to_s
+
           interpolated_locations_with_elevation_this_step =
-            gmaps.elevation_along_path(
-              [from_location, to_location],
-              # Google Maps wants the total nubmer of
-              # interpolated points, including the first
-              # and last.
-              @options['interpolations'] + 2
-            ).flatten
+            # Check to see if these coordinates were already cached?
+            if @coordinates_db.keys.include? db_key
+              @coordinates_db[db_key]
+            else
+              if @options['verbose']
+                @progressbar.log 'Google Maps API call.'.yellow
+              end
+              @coordinates_db[db_key] =
+                gmaps.elevation_along_path([from_location, to_location],
+                  # Google Maps wants the total nubmer of
+                  # interpolated points, including the first
+                  # and last.
+                  @options['interpolations'] + 2
+                ).flatten
+            end
 
           inclines <<
             inclines(interpolated_locations_with_elevation_this_step)
@@ -55,6 +71,7 @@ class Flatbot
       end
     end
 
+    @coordinates_db.flush
     @progressbar.stop
 
     # Output CSV file.
