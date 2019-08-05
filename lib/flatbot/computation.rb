@@ -26,12 +26,25 @@ class Flatbot
       inclines << to_location.merge(slope_percentage: slope_percentage)
 
       if @options['verbose']
-        @logger.log "computed a slope."
-        @logger.log "from: " + from_location.ai(indent: -2, ruby19_syntax: true)
-        @logger.log "to: " + to_location.ai(indent: -2, ruby19_syntax: true)
-        @logger.log "rise: " + "#{rise.round(2)}m".blue
-        @logger.log "run: " + "#{run.round(2)}m".blue
-        @logger.log "slope: " + "#{slope_percentage.round(2)}%\n".blue
+        @progressbar.log "computed a slope."
+        @progressbar.log "from: "
+        @progressbar.log from_location.ai(indent: -2, ruby19_syntax: true)
+        @progressbar.log "to: "
+        @progressbar.log to_location.ai(indent: -2, ruby19_syntax: true)
+        @progressbar.log "rise: " + "#{rise.round(2)}m".blue
+        @progressbar.log "run: " + "#{run.round(2)}m".blue
+        @progressbar.log "slope: " + "#{slope_percentage.round(2)}%\n".blue
+      end
+
+      if @options['threshold'] && @options['threshold'].to_f <= slope_percentage
+        @progressbar.stop
+        @progressbar.log "REJECTED".red
+        @progressbar.log "Slope percentage " + slope_percentage.round(4).to_s.red +
+          " exceeds threshold #{@options['threshold']}"
+        @progressbar.log "rise: " + "#{rise.round(2)}m".red
+        @progressbar.log "run: " + "#{run.round(2)}m".red
+        @progressbar.log "coordinates:"
+        @progressbar.log from_location.ai(indent: -2, ruby19_syntax: true)
       end
     end
 

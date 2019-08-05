@@ -17,7 +17,7 @@ class Flatbot
     @progressbar = ProgressBar.create(
       total: 0,
       autofinish: false,
-      format: "Flatbot has inspected: %c of %C path segments in %a %e %P%"
+      format: "Flatbot has inspected: %c of %C path segments.  %a %e %P%"
     )
   end
 end

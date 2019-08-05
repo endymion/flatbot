@@ -19,8 +19,9 @@ class Flatbot
 
       $ flatbot slopes "46.259181, -96.037663" "45.562839, -94.235428" --interpolations 3
     LONGDESC
+    option :threshold, desc: "The maximum slope percentage to allow before rejecting this course.", default: 1, aliases: '-t'
     option :output, desc: "Output CSV data to this file.", aliases: '-o'
-    option :interpolations, desc: "The number of interpolated points to add between each two points along the path.", :default => 1
+    option :interpolations, desc: "The number of interpolated points to add between each two points along the path.", default: 1
     option :verbose, desc: 'Show all of the details.', aliases: '-v'
     def slopes(start, from)
 

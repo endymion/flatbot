@@ -48,7 +48,7 @@ class Flatbot
 
           inclines <<
             inclines(interpolated_locations_with_elevation_this_step)
-          break
+
           @progressbar.increment
 
         end
