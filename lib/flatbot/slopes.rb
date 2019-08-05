@@ -1,49 +1,57 @@
 require 'google_maps_service'
 
-module Flatbot
-  class Slopes
+class Flatbot
 
-    def compute(start, finish, subdivisions=3)
+  def slopes(start, finish)
 
-      gmaps = GoogleMapsService::Client.new(
-        key: ENV['GOOGLE_MAPS_API_KEY'])
+    gmaps = GoogleMapsService::Client.new(
+      key: ENV['GOOGLE_MAPS_API_KEY'])
 
-      routes = gmaps.directions(
-        Flatbot::Coordinate.from_string(start),
-        Flatbot::Coordinate.from_string(finish),
-        mode: 'bicycling',
-        avoid: ['highways', 'tolls', 'ferries'],
-        units: 'metric',
-        alternatives: false)
+    routes = gmaps.directions(
+      Flatbot::Coordinate.from_string(start),
+      Flatbot::Coordinate.from_string(finish),
+      mode: 'bicycling',
+      avoid: ['highways', 'tolls', 'ferries'],
+      units: 'metric',
+      alternatives: false)
 
-      routes[0][:legs].each do |leg|
-        leg[:steps].each do |step|
+    # Count the total number of locations for the progress bar.
+    # @progressbar.total = 0
+    routes[0][:legs].each do |leg|
+      leg[:steps].each do |step|
+        @progressbar.total +=
+          Polylines::Decoder.decode_polyline(step[:polyline][:points]).length
+      end
+    end
 
-          locations =
-            Polylines::Decoder.decode_polyline(step[:polyline][:points])
+    routes[0][:legs].each do |leg|
+      leg[:steps].each do |step|
 
-          (locations.length - 1).times do |i|
-            from_location = locations[i]
-            to_location = locations[i+1]
+        locations =
+          Polylines::Decoder.decode_polyline(step[:polyline][:points])
 
-            interpolated_locations_with_elevation_this_step =
-              gmaps.elevation_along_path(
-                [from_location, to_location],
-                subdivisions
-              ).flatten
+        (locations.length - 1).times do |i|
+          from_location = locations[i]
+          to_location = locations[i+1]
 
-            interpolated_locations_with_elevation_this_step.map do |location|
-              puts "location: #{location.inspect}"
-            end
+          interpolated_locations_with_elevation_this_step =
+            gmaps.elevation_along_path(
+              [from_location, to_location],
+              # Google Maps wants the total nubmer of
+              # interpolated points, including the first
+              # and last.
+              @options['interpolations'] + 2
+            ).flatten
 
-            puts "slope percentages:\n" +
-              Flatbot::Computation.new.
-                inclines(interpolated_locations_with_elevation_this_step).
-                join("\n") + "\n\n"
+          inclines(interpolated_locations_with_elevation_this_step)
 
-          end
+          @progressbar.increment
+
         end
       end
     end
+
+    @logger.stop
+
   end
 end
