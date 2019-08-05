@@ -1,3 +1,5 @@
+require 'csv'
+require 'awesome_print'
 require 'google_maps_service'
 
 class Flatbot
@@ -24,6 +26,7 @@ class Flatbot
       end
     end
 
+    inclines = []
     routes[0][:legs].each do |leg|
       leg[:steps].each do |step|
 
@@ -43,15 +46,37 @@ class Flatbot
               @options['interpolations'] + 2
             ).flatten
 
-          inclines(interpolated_locations_with_elevation_this_step)
-
+          inclines <<
+            inclines(interpolated_locations_with_elevation_this_step)
+          break
           @progressbar.increment
 
         end
       end
     end
 
-    @logger.stop
+    @progressbar.stop
+
+    # Output CSV file.
+    if @options['output']
+      puts "Writing CSV data to #{@options['output']}"
+      CSV.open(@options['output'], 'wb') do |csv|
+        csv << [
+          'latitude',
+          'longitude',
+          'elevation',
+          'incline'
+        ]
+        inclines.flatten.each do |incline|
+          csv << [
+            incline[:location][:lat],
+            incline[:location][:lng],
+            incline[:elevation],
+            incline[:slope_percentage]
+          ]
+        end
+      end
+    end
 
   end
 end

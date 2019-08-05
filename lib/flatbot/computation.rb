@@ -23,7 +23,7 @@ class Flatbot
       run = distances([from_location, to_location])[0]
 
       slope_percentage = rise / run
-      inclines << slope_percentage
+      inclines << to_location.merge(slope_percentage: slope_percentage)
 
       if @options['verbose']
         @logger.log "computed a slope."
