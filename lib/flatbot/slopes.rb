@@ -23,7 +23,7 @@ class Flatbot
     routes[0][:legs].each do |leg|
       leg[:steps].each do |step|
         @progressbar.total +=
-          Polylines::Decoder.decode_polyline(step[:polyline][:points]).length
+          Polylines::Decoder.decode_polyline(step[:polyline][:points]).length - 1
       end
     end
 
@@ -71,7 +71,7 @@ class Flatbot
       end
     end
 
-    @coordinates_db.flush
+    @coordinates_db.close
     @progressbar.stop
 
     # Output CSV file.
