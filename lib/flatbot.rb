@@ -5,6 +5,7 @@ require 'flatbot/cli'
 require 'flatbot/computation'
 require 'flatbot/coordinate'
 require 'flatbot/inspect'
+require 'flatbot/chart'
 
 require 'ruby-progressbar'
 

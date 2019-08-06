@@ -127,17 +127,16 @@ class Flatbot
 
     template_parameters = {
       'route_name' => route_name,
+      'total_distance' => (distances(inclines).sum / 1000).round(2),
+      'pain' => pain(inclines).round(2),
+      'joy' => joy(inclines).round(2),
       'steepest_uphill' => maximum_slope_percentage.round(2).to_s,
       'steepest_downhill' => minimum_slope_percentage.round(2).to_s,
       'uphill_slope_warning' => maximum_slope_percentage > @options['threshold'].to_f,
       'downhill_slope_warning' => minimum_slope_percentage < -@options['threshold'].to_f,
       'threshold' => @options['threshold'],
-      'elevation_chart_data' =>
-        inclines.map.with_index {
-          |incline, idx| "[#{idx},#{incline[:elevation]}]" }.join(",\n"),
-      'slope_chart_data' =>
-        inclines.map.with_index {
-          |incline, idx| "[#{idx},#{incline[:slope_percentage]}]" }.join(",\n")
+      'elevation_chart_data' => elevation_chart_data(inclines),
+      'slope_chart_data' => slope_chart_data(inclines)
     }
 
     File.open(filename, 'w') do |file|

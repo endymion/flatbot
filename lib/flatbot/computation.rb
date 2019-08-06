@@ -22,7 +22,7 @@ class Flatbot
       rise = to_location[:elevation] - from_location[:elevation]
       run = distances([from_location, to_location])[0]
 
-      slope_percentage = rise / run
+      slope_percentage = rise / run * 100
       inclines << to_location.merge(slope_percentage: slope_percentage)
 
       if @options['verbose']
@@ -78,6 +78,56 @@ class Flatbot
 
     # Return the distance array.
     distances
+  end
+
+  # Computes the Pain metric for a series of locations, by calculating the
+  # area under the slope curve when the slope is positive.
+  #
+  # @param [Array] locations An array of (n) locations along a path.
+  # @return [Numeric] A number that represents the Pain metric.
+  def pain(locations)
+    total_run = 0
+    total_pain = 0
+    # For each pair of locations,
+    (locations.length - 1).times do |i|
+      from_location = locations[i]
+      to_location = locations[i+1]
+
+      rise = to_location[:elevation] - from_location[:elevation]
+      run = distances([from_location, to_location])[0]
+      slope_percentage = rise / run * 100
+      total_run += run
+
+      area = slope_percentage * run
+      total_pain += area if area > 0
+    end
+
+    total_pain / total_run
+  end
+
+  # Computes the Joy metric for a series of locations, by calculating the
+  # area under the slope curve when the slope is negative.
+  #
+  # @param [Array] locations An array of (n) locations along a path.
+  # @return [Numeric] A number that represents the Joy metric.
+  def joy(locations)
+    total_run = 0
+    total_joy = 0
+    # For each pair of locations,
+    (locations.length - 1).times do |i|
+      from_location = locations[i]
+      to_location = locations[i+1]
+
+      rise = to_location[:elevation] - from_location[:elevation]
+      run = distances([from_location, to_location])[0]
+      slope_percentage = rise / run * 100
+      total_run += run
+
+      area = slope_percentage * run
+      total_joy -= area if area < 0
+    end
+
+    total_joy / total_run
   end
 
 end
