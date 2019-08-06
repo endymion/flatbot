@@ -37,14 +37,14 @@ body {
       <dt class="col-sm-3">Joy:</dt>
       <dd class="col-sm-9">{{joy}} bliss / meter</dd>
 
+      <dt class="col-sm-3">Total distance:</dt>
+      <dd class="col-sm-9">{{total_distance}} kilometers</dd>
+
       <dt class="col-sm-3">Steepest uphill:</dt>
       <dd class="col-sm-9">{{steepest_uphill}}%{% if uphill_slope_warning %} <span class="badge badge-danger">warning</span>{% endif %}</dd>
 
       <dt class="col-sm-3">Steepest downhill:</dt>
       <dd class="col-sm-9">{{steepest_downhill}}%{% if downhill_slope_warning %} <span class="badge badge-danger">warning</span>{% endif %}</dd>
-
-      <dt class="col-sm-3">Total distance:</dt>
-      <dd class="col-sm-9">{{total_distance}} kilometers</dd>
     </dl>
 
 {% if uphill_slope_warning %}
@@ -67,12 +67,12 @@ body {
 
     <div class="row">
       <div class="col-12">
-        <div id="elevation_div"></div>
+        <div id="elevation_div" style="witdh: 100%;"></div>
       </div>
     </div>
     <div class="row">
       <div class="col-12">
-        <div id="slope_div"></div>
+        <div id="slope_div" style="witdh: 100%;></div>
       </div>
     </div>
 

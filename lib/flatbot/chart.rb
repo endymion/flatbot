@@ -9,7 +9,7 @@ class Flatbot
 
       run = distances([from_location, to_location])[0]
       total_distance += run
-      chart_data << "[#{total_distance},#{to_location[:elevation]}]"
+      chart_data << "[#{total_distance / 1000},#{to_location[:elevation]}]"
     end
     chart_data.join(",\n")
   end
@@ -23,7 +23,7 @@ class Flatbot
 
       run = distances([from_location, to_location])[0]
       total_distance += run
-      chart_data << "[#{total_distance},#{to_location[:slope_percentage]}]"
+      chart_data << "[#{total_distance / 1000},#{to_location[:slope_percentage]}]"
     end
     chart_data.join(",\n")
   end
