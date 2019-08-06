@@ -11,5 +11,9 @@ class Flatbot
       return {latitude: parts[0], longitude: parts[1]}
     end
 
+    def self.filename_from_string(string)
+      string.gsub(/\,/, '_').gsub!(/[^\d\.\-\_]/, '')
+    end
+
   end
 end

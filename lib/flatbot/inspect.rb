@@ -2,10 +2,25 @@ require 'csv'
 require 'awesome_print'
 require 'google_maps_service'
 require 'daybreak'
+require 'liquid'
 
 class Flatbot
 
-  def slopes(start, finish)
+  def inspect(start, finish)
+
+    route_name =
+      @options['name'] ||
+      "#{Flatbot::Coordinate.filename_from_string(start)}-to-" +
+        "#{Flatbot::Coordinate.filename_from_string(finish)}"
+    puts "Flatbot is seeking " + "joy".green +
+      " and watching for " + "pain".red + " along " +
+      route_name
+
+    @progressbar = ProgressBar.create(
+      total: 0,
+      autofinish: false,
+      format: "Flatbot has inspected: %c of %C path segments.  %a %e %P%"
+    )
 
     gmaps = GoogleMapsService::Client.new(
       key: ENV['GOOGLE_MAPS_API_KEY'])
@@ -30,7 +45,8 @@ class Flatbot
     inclines = []
     @coordinates_db = Daybreak::DB.new 'coordinates.db'
 
-    @coordinates_db['foo'] = 2
+    maximum_slope_percentage = 0
+    minimum_slope_percentage = 0
     routes[0][:legs].each do |leg|
       leg[:steps].each do |step|
 
@@ -64,6 +80,14 @@ class Flatbot
 
           inclines <<
             inclines(interpolated_locations_with_elevation_this_step)
+          inclines.flatten!
+
+          inclines.each do |incline|
+            maximum_slope_percentage = incline[:slope_percentage] if
+              incline[:slope_percentage] > maximum_slope_percentage
+            minimum_slope_percentage = incline[:slope_percentage] if
+              incline[:slope_percentage] < minimum_slope_percentage
+          end
 
           @progressbar.increment
 
@@ -93,6 +117,35 @@ class Flatbot
           ]
         end
       end
+    end
+
+    puts "Steepest uphill: " + maximum_slope_percentage.round(2).to_s.blue
+    puts "Steepest downhill: " + minimum_slope_percentage.round(2).to_s.blue
+
+    filename = @options['report'].gsub(/(\.[^\.]+)$/, ' - ' + route_name + '\1')
+    puts "Writing report to: " + filename.blue
+
+    template_parameters = {
+      'route_name' => route_name,
+      'steepest_uphill' => maximum_slope_percentage.round(2).to_s,
+      'steepest_downhill' => minimum_slope_percentage.round(2).to_s,
+      'uphill_slope_warning' => maximum_slope_percentage > @options['threshold'].to_f,
+      'downhill_slope_warning' => minimum_slope_percentage < -@options['threshold'].to_f,
+      'threshold' => @options['threshold'],
+      'elevation_chart_data' =>
+        inclines.map.with_index {
+          |incline, idx| "[#{idx},#{incline[:elevation]}]" }.join(",\n"),
+      'slope_chart_data' =>
+        inclines.map.with_index {
+          |incline, idx| "[#{idx},#{incline[:slope_percentage]}]" }.join(",\n")
+    }
+
+    File.open(filename, 'w') do |file|
+      file.print Liquid::Template.parse(
+        File.read(
+          File.join(File.dirname(__FILE__),
+            '../../templates/inspection_report.html'))).
+              render(template_parameters)
     end
 
   end
