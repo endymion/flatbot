@@ -11,7 +11,7 @@ class Flatbot
 
       Flatbot will interpolate points between each two points along the directions between the start and finish provided by Google Maps.  At each interpolated point, it will measure the elevation and calculate the slope percentage from the previous point.
 
-      Any slope that exceeds the threshold will generate a warning.  The default threshold is 30, representing a slope percentage of 30%.
+      Any slope that exceeds the max_slope option will generate a warning.  The default maximum slope is 30, representing a slope percentage of 30%.
 
       Provide start and finish as lat / long strings.  Example:
 
@@ -21,7 +21,9 @@ class Flatbot
 
       $ flatbot slopes "46.259181, -96.037663" "45.562839, -94.235428" --interpolations 3
     LONGDESC
-    option :threshold, desc: "The maximum slope percentage to allow before rejecting this course.", default: 30, aliases: '-t'
+    option :max_slope, desc: "The maximum localized slope percentage to allow before rejecting this course.", default: 50
+    option :min_run, desc: "The minimum distance for an inclined segment to count as a climb.", default: 100
+    option :min_slope_percentage, desc: "The minimum incline for an inclined segment to count as a climb.", default: 1
     option :output, desc: "Output CSV data to this file.", aliases: '-o'
     option :interpolations, desc: "The number of interpolated points to add between each two points along the path.", default: 1
     option :verbose, desc: 'Show all of the details.', aliases: '-v'

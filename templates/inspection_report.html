@@ -20,39 +20,49 @@ body {
   padding: 2em;
 }
 </style>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 
 <body>
   <div class="container">
 
-    <h1>Flatbot Route Inspection Report</h1>
-    <h2>{{route_name}}</h2>
+<h1>Flatbot Route Inspection Report</h1>
+<h2>{{route_name}}</h2>
 
-    <p class="lead">Flatbot inspected this route and found:</p>
+<p class="lead">Flatbot inspected this route and found:</p>
 
-    <dl class="row">
-      <dt class="col-sm-3">Pain:</dt>
-      <dd class="col-sm-9">{{pain}} hurts / meter</dd>
+<dl class="row">
+  <dt class="col-sm-3">Pain:</dt>
+  <dd class="col-sm-9">{{pain}} kikohurts</dd>
 
-      <dt class="col-sm-3">Joy:</dt>
-      <dd class="col-sm-9">{{joy}} bliss / meter</dd>
+  <dt class="col-sm-3">Joy:</dt>
+  <dd class="col-sm-9">-{{joy}} kilohurts</dd>
 
-      <dt class="col-sm-3">Total distance:</dt>
-      <dd class="col-sm-9">{{total_distance}} kilometers</dd>
+  <dt class="col-sm-3">Total distance:</dt>
+  <dd class="col-sm-9">{{total_distance}} kilometers</dd>
 
-      <dt class="col-sm-3">Steepest uphill:</dt>
-      <dd class="col-sm-9">{{steepest_uphill}}%{% if uphill_slope_warning %} <span class="badge badge-danger">warning</span>{% endif %}</dd>
+  <dt class="col-sm-3">Biggest climb:</dt>
+  <dd class="col-sm-9">{% if biggest_climb %}{{biggest_climb.pain}} hurts, {{biggest_climb.slope_percentage}}% incline over {{biggest_climb.run}} meters{% else %}No climbs!{% endif %}</dd>
 
-      <dt class="col-sm-3">Steepest downhill:</dt>
-      <dd class="col-sm-9">{{steepest_downhill}}%{% if downhill_slope_warning %} <span class="badge badge-danger">warning</span>{% endif %}</dd>
-    </dl>
+  <dt class="col-sm-3">Biggest drop:</dt>
+  <dd class="col-sm-9">{% if biggest_drop %}-{{biggest_drop.joy}} hurts, {{biggest_drop.slope_percentage}}% incline over {{biggest_drop.run}} meters{% else %}No drops!{% endif %}</dd>
+
+  <dt class="col-sm-3">Steepest uphill slope:</dt>
+  <dd class="col-sm-9">{{steepest_uphill}}%{% if uphill_slope_warning %} <span class="badge badge-danger">warning</span>{% endif %}</dd>
+
+  <dt class="col-sm-3">Steepest downhill slope:</dt>
+  <dd class="col-sm-9">{{steepest_downhill}}%{% if downhill_slope_warning %} <span class="badge badge-danger">warning</span>{% endif %}</dd>
+</dl>
 
 {% if uphill_slope_warning %}
 <div class="alert alert-danger">
   <h4 class="alert-heading"><i class="fa fa-warning"></i> Slope warning!</h4>
   <p>There is a steep uphill on this course!</p>
   <hr>
-  <p>The steepest slope of {{steepest_uphill}}% exceeded the threshold of {{threshold}}%.
+  <p>The steepest slope of {{steepest_uphill}}% exceeded the max_slope of {{max_slope}}%.
 </div>
 {% endif %}
 
@@ -61,25 +71,47 @@ body {
   <h4 class="alert-heading"><i class="fa fa-warning"></i> Slope warning!</h4>
   <p>There is a steep downhill on this course!</p>
   <hr>
-  <p>The steepest slope of {{steepest_downhill}}% exceeded the threshold of -{{threshold}}%.
+  <p>The steepest slope of {{steepest_downhill}}% exceeded the max_slope of -{{max_slope}}%.
 </div>
 {% endif %}
 
-    <div class="row">
-      <div class="col-12">
-        <div id="elevation_div" style="witdh: 100%;"></div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12">
-        <div id="slope_div" style="witdh: 100%;></div>
-      </div>
-    </div>
+<div class="row">
+  <div class="col-12">
+    <div id="elevation_chart_div" style="witdh: 100%;"></div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-12">
+    <div id="slope_chart_div" style="witdh: 100%;"></div>
+  </div>
+</div>
 
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% if climbs.size > 0 %}
+<h2>Slopes</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">score</th>
+      <th scope="col">pain/joy</th>
+      <th scope="col">incline</th>
+      <th scope="col">distance</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for climb in climbs %}
+    <tr style="background-color: {{climb.score_color}};">
+      <td class="align-middle" style="font-size: 200%;">{{ climb.score_emoji }}</td>
+      </td>
+      <td class="align-middle">{% if climb.area > 0 %}{{ climb.pain }} hurts{% else %}-{{ climb.joy }} hurts{% endif %}</td>
+      <td class="align-middle">{{ climb.slope_percentage }}%</td>
+      <td class="align-middle">{{ climb.run }} meters</td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
 <script>
 google.charts.load('current', {packages: ['corechart', 'line']});
 google.charts.setOnLoadCallback(drawElevationChart);
@@ -104,7 +136,7 @@ function drawElevationChart() {
     }
   };
 
-  var chart = new google.visualization.LineChart(document.getElementById('elevation_div'));
+  var chart = new google.visualization.LineChart(document.getElementById('elevation_chart_div'));
   chart.draw(data, options);
 }
 
@@ -127,7 +159,7 @@ function drawSlopeChart() {
     }
   };
 
-  var chart = new google.visualization.LineChart(document.getElementById('slope_div'));
+  var chart = new google.visualization.LineChart(document.getElementById('slope_chart_div'));
   chart.draw(data, options);
 }
 </script>

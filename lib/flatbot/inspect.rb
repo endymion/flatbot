@@ -125,16 +125,34 @@ class Flatbot
     filename = @options['report'].gsub(/(\.[^\.]+)$/, ' - ' + route_name + '\1')
     puts "Writing report to: " + filename.blue
 
+    climbs = climbs(inclines)
+    uphill_climbs = climbs.select{|climb| climb['rise'] > 0 }
+    downhill_drops = climbs.select{|climb| climb['rise'] < 0 }
+
+    if @options['verbose']
+      puts "All slopes:"
+      ap climbs
+
+      puts "Uphill climbs:"
+      ap uphill_climbs
+
+      puts "Downhill drops:"
+      ap downhill_drops
+    end
+
     template_parameters = {
       'route_name' => route_name,
       'total_distance' => (distances(inclines).sum / 1000).round(2),
-      'pain' => pain(inclines).round(2),
-      'joy' => joy(inclines).round(2),
+      'pain' => (pain(inclines) / 1000).round(2),
+      'joy' => (joy(inclines) / 1000).round(2),
+      'climbs' => climbs,
+      'biggest_climb' => uphill_climbs.max{|climb| climb['area'] },
+      'biggest_drop' => downhill_drops.max{|climb| climb['area'] },
       'steepest_uphill' => maximum_slope_percentage.round(2).to_s,
       'steepest_downhill' => minimum_slope_percentage.round(2).to_s,
-      'uphill_slope_warning' => maximum_slope_percentage > @options['threshold'].to_f,
-      'downhill_slope_warning' => minimum_slope_percentage < -@options['threshold'].to_f,
-      'threshold' => @options['threshold'],
+      'uphill_slope_warning' => maximum_slope_percentage > @options['max_slope'].to_f,
+      'downhill_slope_warning' => minimum_slope_percentage < -@options['max_slope'].to_f,
+      'max_slope' => @options['max_slope'],
       'elevation_chart_data' => elevation_chart_data(inclines),
       'slope_chart_data' => slope_chart_data(inclines)
     }
